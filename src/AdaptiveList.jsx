@@ -271,7 +271,7 @@ const AdaptiveList = ({
         loadingMoreStyle === "loadingindicator" ? (
           renderLoadingMore()
         ) : (
-          <>&nbsp;</>
+          <div>Loading</div>
         )}
       </div>
     </div>
