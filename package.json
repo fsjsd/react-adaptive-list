@@ -4,8 +4,7 @@
   "description": "Unopinionated Virtualized Progressive List for React",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack"
   },
   "author": "",
   "license": "MIT",
