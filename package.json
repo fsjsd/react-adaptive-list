@@ -1,13 +1,25 @@
 {
-  "name": "@fsjsd/react-adaptive-list",
-  "version": "1.0.0",
+  "name": "react-adaptive-list",
+  "version": "1.0.4",
   "description": "Unopinionated Virtualized Progressive List for React",
-  "main": "index.js",
+  "main": "src/AdaptiveList.jsx",
   "scripts": {
-    "build": "webpack"
+    "dev": "parcel src/AdaptiveList.jsx",
+    "build": "parcel build src/AdaptiveList.jsx"
   },
-  "author": "",
+  "keywords": [
+    "react",
+    "virtual",
+    "progressive",
+    "list",
+    "scrolling"
+  ],
+  "author": "Full Stack Javascript Dev",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fsjsd/react-adaptive-list/issues"
+  },
+  "homepage": "https://github.com/fsjsd/react-adaptive-list",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fsjsd/react-adaptive-list.git"
@@ -23,12 +35,13 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.24.1",
+    "parcel-bundler": "^1.12.3",
     "path": "^0.12.7",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "webpack": "^4.5.0",
-    "webpack-cli": "^3.2.1"
+    "webpack-cli": "^3.3.2"
   },
   "dependencies": {
     "use-debounce": "^2.1.0"

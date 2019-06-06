@@ -26,7 +26,7 @@ const AdaptiveList = ({
 
   // default loadingMore if none is provided
   if (!renderLoadingMore) {
-    renderLoadingMore = () => <div>Loading &hellip;</div>;
+    renderLoadingMore = () => <div>Loading ...</div>;
   }
   if (!renderTombstone) {
     renderTombstone = computedStyle => <div style={{ ...computedStyle }} />;
@@ -210,15 +210,12 @@ const AdaptiveList = ({
         top: `${tombStoneStartingTop(lastItemIndex)}px`
       });
     }
-    //isRowVisibleInViewPort;
-    console.log();
 
     return tombstones;
   }, [rowHeight, state.items.length]);
 
   // on mount
   useEffect(() => {
-    console.log("attach scroll events");
     getViewportWrapper().addEventListener("resize", handleScroll);
     getViewportWrapper().addEventListener("scroll", handleScroll, {
       passive: true
