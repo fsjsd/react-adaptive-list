@@ -1,3 +1,2 @@
-export default function HelloWorld() {
-  console.log("hello world");
-}
+import AdaptiveList from "./src/AdaptiveList";
+export default AdaptiveList;
