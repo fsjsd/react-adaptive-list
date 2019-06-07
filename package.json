@@ -1,11 +1,12 @@
 {
   "name": "react-adaptive-list",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Unopinionated Virtualized Progressive List for React",
   "main": "src/AdaptiveList.jsx",
   "scripts": {
     "dev": "parcel src/AdaptiveList.jsx",
-    "build": "parcel build src/AdaptiveList.jsx"
+    "build": "parcel build src/AdaptiveList.jsx",
+    "test": "jest --watch"
   },
   "keywords": [
     "react",
@@ -35,6 +36,9 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.24.1",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "jest": "^24.8.0",
     "parcel-bundler": "^1.12.3",
     "path": "^0.12.7",
     "prop-types": "^15.6.0",
