@@ -1,11 +1,10 @@
 {
   "name": "react-adaptive-list",
-  "version": "1.0.7a",
+  "version": "1.0.8a",
   "description": "Unopinionated Virtualized Progressive List for React",
   "main": "src/AdaptiveList.jsx",
   "scripts": {
-    "start": "parcel demo/index.html",
-    "dev": "parcel src/AdaptiveList.jsx",
+    "dev": "parcel demo/index.html",
     "build": "parcel build src/AdaptiveList.jsx",
     "test": "jest --watch"
   },
