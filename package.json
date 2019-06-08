@@ -5,8 +5,9 @@
   "main": "src/AdaptiveList.jsx",
   "scripts": {
     "dev": "parcel demo/index.html",
+    "testdev": "jest --watch",
     "build": "parcel build src/AdaptiveList.jsx",
-    "test": "jest --watch"
+    "test": "jest"
   },
   "keywords": [
     "react",
@@ -31,11 +32,9 @@
     "react-scripts": "3.0.1"
   },
   "devDependencies": {
-    "babel-core": "6.26.3",
-    "babel-loader": "7.1.5",
-    "babel-preset-env": "1.7.0",
-    "babel-preset-react": "6.24.1",
-    "babel-preset-stage-0": "6.24.1",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0",
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.14.0",
     "jest": "24.8.0",
