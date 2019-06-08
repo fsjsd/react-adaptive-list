@@ -47,5 +47,10 @@
   },
   "dependencies": {
     "use-debounce": "^2.1.0"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "./setupTests.js"
+    ]
   }
 }
