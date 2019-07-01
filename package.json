@@ -4,10 +4,10 @@
   "description": "Unopinionated Virtualized Progressive List for React",
   "main": "lib/AdaptiveList.js",
   "scripts": {
-    "dev": "parcel demo/index.html",
-    "testdev": "jest --watch",
-    "build": "parcel build src/AdaptiveList.jsx",
-    "test": "jest"
+    "start": "parcel build src/AdaptiveList.jsx --no-minify --global react-adaptive-list  && parcel demo/index.html --out-dir demo/dist --open",
+    "build": "parcel build src/AdaptiveList.jsx --global react-adaptive-list",
+    "test": "jest",
+    "testdev": "jest --watch"
   },
   "keywords": [
     "react",
@@ -26,6 +26,10 @@
     "type": "git",
     "url": "git+https://github.com/fsjsd/react-adaptive-list.git"
   },
+  "alias": {
+    "react": "./node_modules/react",
+    "react-dom": "./node_modules/react-dom"
+  },
   "peerDependencies": {
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -38,8 +42,6 @@
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.14.0",
     "jest": "24.8.0",
-    "parcel-bundler": "1.12.3",
-    "path": "0.12.7",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6"
@@ -51,5 +53,9 @@
     "setupFilesAfterEnv": [
       "./setupTests.js"
     ]
-  }
+  },
+  "files": [
+    "lib/AdaptiveList.js",
+    "src/AdaptiveList.jsx"
+  ]
 }

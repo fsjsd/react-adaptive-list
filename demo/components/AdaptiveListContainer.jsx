@@ -1,15 +1,21 @@
 import React from "react";
-import AdaptiveList from "../../src/AdaptiveList";
+//import AdaptiveList from "../../src/AdaptiveList";
+import AdaptiveList from "../../dist/AdaptiveList";
 import Tombstone from "./Tombstone";
 
-// simple fund to manage data loading scenarios for the list component
+const LoadMoreStyles = {
+  LoadingIndicator: "loadingindicator",
+  TombStones: "tombstones"
+};
+
+// simple func to manage data loading scenarios for the list component
 // This enables you to vary data page size, loading speed, 'load more'
 // styling and total record count (for long lists)
 const listManager = ({
   initialRowCount = 0,
   isCompleteOnInit = false,
   sideEffectSpeedMs = 2000,
-  loadMoreStyle = "loadingindicator",
+  loadMoreStyle = LoadMoreStyles.LoadingIndicator,
   pageSize = 5,
   totalRecords = 30
 } = {}) => {
@@ -52,14 +58,14 @@ function AdaptiveListContainer() {
     sideEffectSpeedMs: 200,
     pageSize: 3,
     totalRecords: 500,
-    loadMoreStyle: "loadingindicator"
+    loadMoreStyle: LoadMoreStyles.LoadingIndicator
   });
   const listManagerB = listManager({
     initialRowCount: 2,
     sideEffectSpeedMs: 500,
     pageSize: 2,
     totalRecords: 50,
-    loadMoreStyle: "tombstones"
+    loadMoreStyle: LoadMoreStyles.TombStones
   });
 
   return (

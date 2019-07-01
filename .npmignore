@@ -1,5 +1,10 @@
 src
 demo
+build-demo
 .babelrc
 webpack.config.js
 .cache
+.gitignore
+.eslintrc.json
+.prettierrc
+src
