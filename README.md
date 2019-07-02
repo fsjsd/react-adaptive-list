@@ -10,3 +10,23 @@ Virtualized, progressive loading list component for React 16.8+
 * Unopinionated UI - you set row style, loading UI
 * Configure loading modes - row tombstones or end of list animation
 * Fixed height rows only
+
+## Installation
+
+Install Parcel globally to build React Adaptive List
+
+```
+npm install -g parcel-bundler
+```
+
+Then install dependencies:
+
+```
+npm install
+```
+
+Then run start to see the demo:
+
+```
+npm run start
+```
