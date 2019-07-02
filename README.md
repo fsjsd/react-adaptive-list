@@ -10,5 +10,3 @@ Virtualized, progressive loading list component for React 16.8+
 * Unopinionated UI - you set row style, loading UI
 * Configure loading modes - row tombstones or end of list animation
 * Fixed height rows only
-
-[![Edit react-adaptive-list](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/fsjsd/react-adaptive-list/tree/master/?fontsize=14)
