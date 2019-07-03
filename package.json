@@ -1,23 +1,13 @@
 {
   "name": "react-adaptive-list",
-  "version": "1.0.10a",
-  "description": "Unopinionated Virtualized Progressive List for React",
-  "main": "lib/AdaptiveList.js",
-  "scripts": {
-    "start": "parcel build src/AdaptiveList.jsx --no-minify --global react-adaptive-list  && parcel demo/index.html --out-dir demo/dist --open",
-    "build": "parcel build src/AdaptiveList.jsx --global react-adaptive-list",
-    "test": "jest",
-    "testdev": "jest --watch"
+  "version": "1.0.11a",
+  "private": false,
+  "dependencies": {
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1",
+    "use-debounce": "^2.1.0"
   },
-  "keywords": [
-    "react",
-    "virtual",
-    "progressive",
-    "list",
-    "scrolling"
-  ],
-  "author": "Full Stack Javascript Dev",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/fsjsd/react-adaptive-list/issues"
   },
@@ -26,36 +16,25 @@
     "type": "git",
     "url": "git+https://github.com/fsjsd/react-adaptive-list.git"
   },
-  "alias": {
-    "react": "./node_modules/react",
-    "react-dom": "./node_modules/react-dom"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
-  "peerDependencies": {
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+  "eslintConfig": {
+    "extends": "react-app"
   },
-  "devDependencies": {
-    "@babel/core": "7.4.5",
-    "@babel/preset-env": "7.4.5",
-    "@babel/preset-react": "7.0.0",
-    "enzyme": "3.10.0",
-    "enzyme-adapter-react-16": "1.14.0",
-    "jest": "24.8.0",
-    "prop-types": "15.7.2",
-    "react": "16.8.6",
-    "react-dom": "16.8.6"
-  },
-  "dependencies": {
-    "use-debounce": "^2.1.0"
-  },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "./setupTests.js"
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
     ]
-  },
-  "files": [
-    "lib/AdaptiveList.js",
-    "src/AdaptiveList.jsx"
-  ]
+  }
 }

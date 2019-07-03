@@ -1,6 +1,5 @@
 import React from "react";
-//import AdaptiveList from "../../src/AdaptiveList";
-import AdaptiveList from "../../dist/AdaptiveList";
+import AdaptiveList from "./AdaptiveList";
 import Tombstone from "./Tombstone";
 
 const LoadMoreStyles = {
