@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback
+} from "react";
 import PropTypes from "prop-types";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -9,7 +15,21 @@ const style = {
   }
 };
 
-const scrollDebounceMs = 30;
+const scrollDebounceMs = 16;
+
+const calcViewPortStyles = el => ({
+  wrapperHeight: el.offsetHeight,
+  viewportScrollTop: el.scrollTop,
+  viewportScrollHeight: el.scrollHeight,
+  reachedLimit: el.scrollTop + el.offsetHeight >= el.scrollHeight
+});
+
+const getElementPos = el => ({
+  offsetHeight: el.offsetHeight,
+  offsetTop: el.offsetTop,
+  scrollTop: el.scrollTop,
+  scrollHeight: el.scrollHeight
+});
 
 const AdaptiveList = ({
   initialData,
@@ -21,10 +41,9 @@ const AdaptiveList = ({
   renderTombstone,
   rowHeight,
   overscanAmount = 5,
-  loadingMoreStyle = "loadingindicator" // loadingindicator | tombstones
+  loadingMoreStyle = "loadingindicator", // loadingindicator | tombstones
+  ...props
 }) => {
-  //console.log("AdaptiveList::ctor");
-
   // default loadingMore if none is provided
   if (!renderLoadingMore) {
     renderLoadingMore = () => <div>Loading ...</div>;
@@ -45,18 +64,15 @@ const AdaptiveList = ({
     reachedLimit: false
   });
 
+  //const [visibleViewportHeight, setVisibleViewportHeight] = useState(null);
+
   const overscan = rowHeight * overscanAmount;
 
   const setIsLoadingMore = useCallback(isLoadingMore => {
-    // setState(prevState => ({
-    //   ...prevState,
-    //   isLoadingMore: isLoadingMore
-    // }));
     setState(prevState => ({
       ...prevState,
       isLoadingMore
     }));
-    // TODO:
   }, []);
 
   // DOM reference to wrapping viewport element
@@ -67,18 +83,16 @@ const AdaptiveList = ({
   // for more data
   let loadMoreElRef = useRef();
 
-  const getViewportWrapper = () => viewportWrapperElRef.current;
-  const getLoadMoreEl = () => loadMoreElRef.current;
+  const getViewportWrapper = useCallback(() => viewportWrapperElRef.current);
+
+  //const getLoadMoreEl = () => loadMoreElRef.current;
   const getVisibleHeight = useCallback(() => {
     let el = getViewportWrapper();
     let visHeight = el
       ? parseFloat(window.getComputedStyle(el, null).getPropertyValue("height"))
       : 10000;
-    //console.log(visHeight, el);
     return visHeight;
-  }, []);
-
-  //const getViewportWrapperClientRect = () => getViewportWrapper().getBoundingClientRect();
+  }, [getViewportWrapper]);
 
   // Debounce callback
   // https://github.com/xnimorz/use-debounce
@@ -87,15 +101,15 @@ const AdaptiveList = ({
   const [handleScroll] = useDebouncedCallback(
     // function
     e => {
-      //console.log("handleScroll");
+      const styles = calcViewPortStyles(e.target);
+
       setState(prevState => ({
         ...prevState,
-        wrapperHeight: e.target.offsetHeight,
         wrapperVisibleHeight: getVisibleHeight(),
-        viewportScrollTop: e.target.scrollTop,
-        viewportScrollHeight: e.target.scrollHeight,
-        reachedLimit:
-          e.target.scrollTop + e.target.offsetHeight >= e.target.scrollHeight
+        wrapperHeight: styles.offsetHeight,
+        viewportScrollTop: styles.viewportScrollTop,
+        viewportScrollHeight: styles.viewportScrollHeight,
+        reachedLimit: styles.reachedLimit
       }));
     },
     // delay in ms
@@ -103,73 +117,53 @@ const AdaptiveList = ({
     { maxWait: scrollDebounceMs }
   );
 
-  const getElementPos = el => ({
-    offsetHeight: el.offsetHeight,
-    offsetTop: el.offsetTop,
-    scrollTop: el.scrollTop,
-    scrollHeight: el.scrollHeight
-  });
+  /*
+    useAnimationFrame(() =>
+    setValue(v => v + 0.01)
+  );
+  */
 
-  const shouldLoadMore = () => {
+  const shouldLoadMore = useCallback(() => {
     // don't attempt loading more if already in flight
     // drop out immediately on these flags to optimise repeat calls early
     if (state.isComplete || state.isLoadingMore) return false;
 
     const viewportWrapper = getViewportWrapper();
-    const loadMoreEl = getLoadMoreEl();
     const currentWrapperPos = viewportWrapper && getElementPos(viewportWrapper);
-    const latestWrapperPos = loadMoreEl && getElementPos(loadMoreEl);
-    //const visibleHeight = getVisibleHeight();
-
-    //console.log('shouldLoadMore', state.items.length, { isComplete: state.isComplete, isLoadingMore: state.isLoadingMore }, currentWrapperPos, loadMoreEl, latestWrapperPos);
 
     // drop out if initialising
-    if (!currentWrapperPos || !latestWrapperPos) return false;
+    if (!currentWrapperPos) return false;
+
+    const loadMoreTop = state.items.length * rowHeight;
 
     // if loadMoreElRef is visible or within overscan, request more data
     const loadingVisible =
-      loadMoreEl.offsetTop - viewportWrapper.offsetTop <
+      loadMoreTop - viewportWrapper.offsetTop <
       viewportWrapper.offsetHeight + viewportWrapper.scrollTop;
 
-    /* console.log("shouldLoadMore", {
-      loadMoreOffTop: loadMoreEl.offsetTop,
-      wrapperOffTop: viewportWrapper.offsetTop,
-      wrapperOffHeight: viewportWrapper.offsetHeight,
-      wrapperScrollTop: viewportWrapper.scrollTop,
-      loadMoreVis: loadingVisible,
-      isLoadingMore: state.isLoadingMore
-    }); */
-
     if (!loadingVisible) {
-      //console.log("EXIT");
       return false;
     } else {
-      //console.log("LOAD MORE");
-
       setIsLoadingMore(true);
-
       onLoadMore(onMoreLoaded);
-
       return true;
     }
-  }; //, [state.isComplete, state.isLoadingMore]);
+  }); //, [state.isComplete, state.isLoadingMore]);
 
   // callback when container component provides more
   // data after side effects
   const onMoreLoaded = ({ items, complete }) => {
-    //console.log('onMoreLoaded', state.items.length, items.length, complete);
     setState(prevState => ({
       ...prevState,
       items: [...prevState.items, ...items],
       isComplete: complete,
-      // mark component as ready to load more
-      isLoadingMore: false
+      isLoadingMore: false // mark component as ready to load more
     }));
   };
 
   const isRowVisibleInViewPort = useCallback(
     (rowIndex, includeTopOverscan = true) => {
-      const visibleHeight = getVisibleHeight();
+      const visibleHeight = state.wrapperVisibleHeight;
 
       // render nothing until DOM established
       if (visibleHeight === 0) return false;
@@ -181,30 +175,18 @@ const AdaptiveList = ({
       const bottomVis =
         rowBottom <= state.viewportScrollTop + visibleHeight + overscan;
 
-      /*
-      console.log("isRowVisibleInViewPort", {
-        rowIndex,
-        rowBottom,
-        vwScrollTop: state.viewportScrollTop,
-        vwHeight: visibleHeight,
-        topVis,
-        bottomVis
-      });
-      */
-
       return topVis && bottomVis;
     },
-    [rowHeight, overscan, state.viewportScrollTop, getVisibleHeight]
+    [state.wrapperVisibleHeight, state.viewportScrollTop, overscan, rowHeight]
   );
 
   const visibleTombStonePositions = useCallback(() => {
-    // spec. Generate 'fake' ts rows for every items beyond the current viewport, up to one page deep
-
     const tombStoneStartingTop = tombStoneIndex => tombStoneIndex * rowHeight;
     let lastItemIndex = state.items.length - 1;
 
     const tombstones = [];
 
+    // Generate 'fake' ts rows for every items beyond the current viewport, up to one page deep
     while (isRowVisibleInViewPort(++lastItemIndex, false)) {
       tombstones.push({
         index: `ts${lastItemIndex}`,
@@ -213,7 +195,7 @@ const AdaptiveList = ({
     }
 
     return tombstones;
-  }, [rowHeight, state.items.length]);
+  }, [isRowVisibleInViewPort, rowHeight, state.items.length]);
 
   // on mount
   useEffect(() => {
@@ -221,6 +203,12 @@ const AdaptiveList = ({
     getViewportWrapper().addEventListener("scroll", handleScroll, {
       passive: true
     });
+
+    // calc on mount
+    setState(prevState => ({
+      ...prevState,
+      wrapperVisibleHeight: getVisibleHeight()
+    }));
 
     // trigger on mount
     shouldLoadMore("onmount");
@@ -233,12 +221,16 @@ const AdaptiveList = ({
       wrapperRef &&
         getViewportWrapper().removeEventListener("resize", handleScroll);
     };
-  }, []);
+  }, [getViewportWrapper, getVisibleHeight, handleScroll, shouldLoadMore]);
 
   return (
     <div
       className="AdaptiveList"
-      style={style.wrapper}
+      {...props}
+      style={{
+        ...(props.style || {}),
+        ...style.wrapper
+      }}
       ref={viewportWrapperElRef}
     >
       {state.isComplete && state.items.length === 0 && renderEmptyList()}
@@ -248,7 +240,9 @@ const AdaptiveList = ({
           renderRow({
             index: index,
             item,
-            computedStyle: { top: index * rowHeight }
+            computedStyle: {
+              transform: `translate(0px, ${index * rowHeight}px)`
+            }
           })
       )}
       {state.isLoadingMore &&
@@ -260,16 +254,17 @@ const AdaptiveList = ({
         ref={loadMoreElRef}
         style={{
           position: "absolute",
-          top: state.items.length * rowHeight
+          transform: `translate(0px, ${state.items.length * rowHeight}px)`
         }}
       >
-        {// show loading indictor if loading more or load initiated
-        // via shouldLoadMore(), and if set style
+        {// show loading indictor if loading more or
+        // if loadMore callback initiated via shouldLoadMore(),
+        // and if set component style
         (state.isLoadingMore || shouldLoadMore()) &&
         loadingMoreStyle === "loadingindicator" ? (
           renderLoadingMore()
         ) : (
-          <div>Loading</div>
+          <div>&nbsp;</div>
         )}
       </div>
     </div>

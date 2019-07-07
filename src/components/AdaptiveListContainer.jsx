@@ -44,10 +44,6 @@ const listManager = ({
   };
 };
 
-const perfCompStyle = {
-  height: "100%"
-};
-
 function AdaptiveListContainer() {
   // ============== Adaptive List ==============
 
@@ -56,7 +52,7 @@ function AdaptiveListContainer() {
     initialRowCount: 0,
     sideEffectSpeedMs: 200,
     pageSize: 3,
-    totalRecords: 500,
+    totalRecords: 5000,
     loadMoreStyle: LoadMoreStyles.LoadingIndicator
   });
   const listManagerB = listManager({
@@ -66,10 +62,19 @@ function AdaptiveListContainer() {
     totalRecords: 50,
     loadMoreStyle: LoadMoreStyles.TombStones
   });
+  const listManagerC = listManager({
+    isCompleteOnInit: true,
+    initialRowCount: 3000,
+    sideEffectSpeedMs: 0,
+    pageSize: 2,
+    totalRecords: 300000,
+    loadMoreStyle: LoadMoreStyles.TombStones
+  });
+  //
 
   return (
     <div className="ListViewPane block-fill-height">
-      <div className="Toolbar">Header</div>
+      <div className="Toolbar">Header x</div>
       <div className="Lists">
         <AdaptiveList
           overscanAmount={20}
@@ -114,6 +119,35 @@ function AdaptiveListContainer() {
                 <b>{item.title}</b>
               </div>
               <div>List B: More detail</div>
+            </div>
+          )}
+          renderTombstone={({ index, top }) => (
+            <Tombstone
+              style={{ top: top }}
+              key={index}
+              id={`tombstone${index}`}
+            />
+          )}
+          renderEmptyList={() => <div>Empty</div>}
+          renderLoadingMore={computedStyle => <div>Loading more....</div>}
+        />
+        <AdaptiveList
+          initialData={listManagerC.initialData}
+          isCompleteOnInit={listManagerC.isCompleteOnInit}
+          onLoadMore={listManagerC.handleLoadMore}
+          loadingMoreStyle={listManagerC.loadMoreStyle}
+          rowHeight={60}
+          renderRow={({ item, computedStyle, index }) => (
+            <div
+              key={index}
+              id={`row${index}`}
+              className="rowStyle"
+              style={computedStyle}
+            >
+              <div>
+                <b>{item.title}</b>
+              </div>
+              <div>List C: More detail</div>
             </div>
           )}
           renderTombstone={({ index, top }) => (
