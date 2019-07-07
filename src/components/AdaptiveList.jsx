@@ -225,7 +225,6 @@ const AdaptiveList = ({
 
   return (
     <div
-      className="AdaptiveList"
       {...props}
       style={{
         ...(props.style || {}),

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useDebouncedCallback } from "use-debounce"; //
 
@@ -7,6 +9,20 @@ const style = {
   }
 };
 const scrollDebounceMs = 16;
+
+const calcViewPortStyles = el => ({
+  wrapperHeight: el.offsetHeight,
+  viewportScrollTop: el.scrollTop,
+  viewportScrollHeight: el.scrollHeight,
+  reachedLimit: el.scrollTop + el.offsetHeight >= el.scrollHeight
+});
+
+const getElementPos = el => ({
+  offsetHeight: el.offsetHeight,
+  offsetTop: el.offsetTop,
+  scrollTop: el.scrollTop,
+  scrollHeight: el.scrollHeight
+});
 
 const AdaptiveList = ({
   initialData,
@@ -18,10 +34,10 @@ const AdaptiveList = ({
   renderTombstone,
   rowHeight,
   overscanAmount = 5,
-  loadingMoreStyle = "loadingindicator" // loadingindicator | tombstones
-
+  loadingMoreStyle = "loadingindicator",
+  // loadingindicator | tombstones
+  ...props
 }) => {
-  //console.log("AdaptiveList::ctor");
   // default loadingMore if none is provided
   if (!renderLoadingMore) {
     renderLoadingMore = () => React.createElement("div", null, "Loading ...");
@@ -44,16 +60,13 @@ const AdaptiveList = ({
     viewportScrollHeight: 0,
     viewportScrollPosition: 0,
     reachedLimit: false
-  });
+  }); //const [visibleViewportHeight, setVisibleViewportHeight] = useState(null);
+
   const overscan = rowHeight * overscanAmount;
   const setIsLoadingMore = useCallback(isLoadingMore => {
-    // setState(prevState => ({
-    //   ...prevState,
-    //   isLoadingMore: isLoadingMore
-    // }));
     setState(prevState => ({ ...prevState,
       isLoadingMore
-    })); // TODO:
+    }));
   }, []); // DOM reference to wrapping viewport element
 
   let viewportWrapperElRef = useRef(); // DOM reference to 'load more' element at end of list.
@@ -61,82 +74,52 @@ const AdaptiveList = ({
   // for more data
 
   let loadMoreElRef = useRef();
-
-  const getViewportWrapper = () => viewportWrapperElRef.current;
-
-  const getLoadMoreEl = () => loadMoreElRef.current;
+  const getViewportWrapper = useCallback(() => viewportWrapperElRef.current); //const getLoadMoreEl = () => loadMoreElRef.current;
 
   const getVisibleHeight = useCallback(() => {
     let el = getViewportWrapper();
-    let visHeight = el ? parseFloat(window.getComputedStyle(el, null).getPropertyValue("height")) : 10000; //console.log(visHeight, el);
-
+    let visHeight = el ? parseFloat(window.getComputedStyle(el, null).getPropertyValue("height")) : 10000;
     return visHeight;
-  }, []); //const getViewportWrapperClientRect = () => getViewportWrapper().getBoundingClientRect();
-  // Debounce callback
+  }, [getViewportWrapper]); // Debounce callback
   // https://github.com/xnimorz/use-debounce
   // Use { maxWait: 2000 } to emulate throttle?
   // https://github.com/xnimorz/use-debounce/blob/master/src/callback.js
 
   const [handleScroll] = useDebouncedCallback( // function
   e => {
-    //console.log("handleScroll");
+    const styles = calcViewPortStyles(e.target);
     setState(prevState => ({ ...prevState,
-      wrapperHeight: e.target.offsetHeight,
       wrapperVisibleHeight: getVisibleHeight(),
-      viewportScrollTop: e.target.scrollTop,
-      viewportScrollHeight: e.target.scrollHeight,
-      reachedLimit: e.target.scrollTop + e.target.offsetHeight >= e.target.scrollHeight
+      wrapperHeight: styles.offsetHeight,
+      viewportScrollTop: styles.viewportScrollTop,
+      viewportScrollHeight: styles.viewportScrollHeight,
+      reachedLimit: styles.reachedLimit
     }));
   }, // delay in ms
   scrollDebounceMs, {
     maxWait: scrollDebounceMs
   });
-
-  const getElementPos = el => ({
-    offsetHeight: el.offsetHeight,
-    offsetTop: el.offsetTop,
-    scrollTop: el.scrollTop,
-    scrollHeight: el.scrollHeight
-  });
+  /*
+    useAnimationFrame(() =>
+    setValue(v => v + 0.01)
+  );
+  */
 
   const shouldLoadMore = useCallback(() => {
-    //console.log("shouldLoadMore");
     // don't attempt loading more if already in flight
     // drop out immediately on these flags to optimise repeat calls early
     if (state.isComplete || state.isLoadingMore) return false;
     const viewportWrapper = getViewportWrapper();
-    const loadMoreEl = getLoadMoreEl();
-    const currentWrapperPos = viewportWrapper && getElementPos(viewportWrapper); //const latestWrapperPos = loadMoreEl && getElementPos(loadMoreEl);
-    //const visibleHeight = getVisibleHeight();
-    //console.log('shouldLoadMore', state.items.length, { isComplete: state.isComplete, isLoadingMore: state.isLoadingMore }, currentWrapperPos, loadMoreEl, latestWrapperPos);
-    // drop out if initialising
+    const currentWrapperPos = viewportWrapper && getElementPos(viewportWrapper); // drop out if initialising
 
     if (!currentWrapperPos) return false;
-    const loadMoreTop = state.items.length * rowHeight; //const loadMoreTop = loadMoreEl.offsetTop
-
-    /*const loadMoreTop = parseInt(
-      loadMoreEl.style.transform.substr(
-        15,
-        loadMoreEl.style.transform.length - 18
-      )
-    );*/
-    // if loadMoreElRef is visible or within overscan, request more data
+    const loadMoreTop = state.items.length * rowHeight; // if loadMoreElRef is visible or within overscan, request more data
 
     const loadingVisible = loadMoreTop - viewportWrapper.offsetTop < viewportWrapper.offsetHeight + viewportWrapper.scrollTop;
-    /* console.log("shouldLoadMore", {
-      loadMoreOffTop: loadMoreEl.offsetTop,
-      wrapperOffTop: viewportWrapper.offsetTop,
-      wrapperOffHeight: viewportWrapper.offsetHeight,
-      wrapperScrollTop: viewportWrapper.scrollTop,
-      loadMoreVis: loadingVisible,
-      isLoadingMore: state.isLoadingMore
-    }); */
 
     if (!loadingVisible) {
-      //console.log("EXIT");
       return false;
     } else {
-      //console.log("LOAD MORE");
       setIsLoadingMore(true);
       onLoadMore(onMoreLoaded);
       return true;
@@ -149,17 +132,16 @@ const AdaptiveList = ({
     items,
     complete
   }) => {
-    //console.log('onMoreLoaded', state.items.length, items.length, complete);
     setState(prevState => ({ ...prevState,
       items: [...prevState.items, ...items],
       isComplete: complete,
-      // mark component as ready to load more
-      isLoadingMore: false
+      isLoadingMore: false // mark component as ready to load more
+
     }));
   };
 
   const isRowVisibleInViewPort = useCallback((rowIndex, includeTopOverscan = true) => {
-    const visibleHeight = getVisibleHeight(); // render nothing until DOM established
+    const visibleHeight = state.wrapperVisibleHeight; // render nothing until DOM established
 
     if (visibleHeight === 0) return false;
     const overscanAdjusted = includeTopOverscan ? overscan : 0;
@@ -167,25 +149,13 @@ const AdaptiveList = ({
     const rowBottom = rowTop + rowHeight;
     const topVis = rowTop >= state.viewportScrollTop - overscanAdjusted;
     const bottomVis = rowBottom <= state.viewportScrollTop + visibleHeight + overscan;
-    /*
-    console.log("isRowVisibleInViewPort", {
-      rowIndex,
-      rowBottom,
-      vwScrollTop: state.viewportScrollTop,
-      vwHeight: visibleHeight,
-      topVis,
-      bottomVis
-    });
-    */
-
     return topVis && bottomVis;
-  }, [rowHeight, overscan, state.viewportScrollTop, getVisibleHeight]);
+  }, [state.wrapperVisibleHeight, state.viewportScrollTop, overscan, rowHeight]);
   const visibleTombStonePositions = useCallback(() => {
-    // spec. Generate 'fake' ts rows for every items beyond the current viewport, up to one page deep
     const tombStoneStartingTop = tombStoneIndex => tombStoneIndex * rowHeight;
 
     let lastItemIndex = state.items.length - 1;
-    const tombstones = [];
+    const tombstones = []; // Generate 'fake' ts rows for every items beyond the current viewport, up to one page deep
 
     while (isRowVisibleInViewPort(++lastItemIndex, false)) {
       tombstones.push({
@@ -201,7 +171,11 @@ const AdaptiveList = ({
     getViewportWrapper().addEventListener("resize", handleScroll);
     getViewportWrapper().addEventListener("scroll", handleScroll, {
       passive: true
-    }); // trigger on mount
+    }); // calc on mount
+
+    setState(prevState => ({ ...prevState,
+      wrapperVisibleHeight: getVisibleHeight()
+    })); // trigger on mount
 
     shouldLoadMore("onmount"); // detach on unmount
 
@@ -210,12 +184,13 @@ const AdaptiveList = ({
       wrapperRef && getViewportWrapper().removeEventListener("scroll", handleScroll);
       wrapperRef && getViewportWrapper().removeEventListener("resize", handleScroll);
     };
-  }, [handleScroll, shouldLoadMore]);
-  return React.createElement("div", {
-    className: "AdaptiveList",
-    style: style.wrapper,
+  }, [getViewportWrapper, getVisibleHeight, handleScroll, shouldLoadMore]);
+  return React.createElement("div", _extends({}, props, {
+    style: { ...(props.style || {}),
+      ...style.wrapper
+    },
     ref: viewportWrapperElRef
-  }, state.isComplete && state.items.length === 0 && renderEmptyList(), state.items.map((item, index) => isRowVisibleInViewPort(index) && renderRow({
+  }), state.isComplete && state.items.length === 0 && renderEmptyList(), state.items.map((item, index) => isRowVisibleInViewPort(index) && renderRow({
     index: index,
     item,
     computedStyle: {
