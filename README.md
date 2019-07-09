@@ -1,5 +1,7 @@
 # React Adaptive List
 
+![React Adaptive List](https://github.com/fsjsd/react-router-utilitybelt/blob/master/docs/readme-header-reactadaptivelist.jpg?raw=true)
+
 [![npm version](http://img.shields.io/npm/v/react-adaptive-list.svg?style=flat)](https://npmjs.org/package/react-adaptive-list "View this project on npm")
 
 ++ EXPERIMENTAL ++
