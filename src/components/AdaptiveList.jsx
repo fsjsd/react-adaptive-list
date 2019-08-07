@@ -1,19 +1,7 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useRef,
-  useCallback
-} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useDebouncedCallback } from "use-debounce";
-
-//
-const style = {
-  wrapper: {
-    //overflowY: 'auto',
-  }
-};
+import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
 const scrollDebounceMs = 16;
 
@@ -94,6 +82,10 @@ const AdaptiveList = ({
     return visHeight;
   }, [getViewportWrapper]);
 
+  useAnimationFrame(() => {
+    
+  });
+
   // Debounce callback
   // https://github.com/xnimorz/use-debounce
   // Use { maxWait: 2000 } to emulate throttle?
@@ -116,12 +108,6 @@ const AdaptiveList = ({
     scrollDebounceMs,
     { maxWait: scrollDebounceMs }
   );
-
-  /*
-    useAnimationFrame(() =>
-    setValue(v => v + 0.01)
-  );
-  */
 
   const shouldLoadMore = useCallback(() => {
     // don't attempt loading more if already in flight
@@ -227,8 +213,7 @@ const AdaptiveList = ({
     <div
       {...props}
       style={{
-        ...(props.style || {}),
-        ...style.wrapper
+        ...(props.style || {})
       }}
       ref={viewportWrapperElRef}
     >

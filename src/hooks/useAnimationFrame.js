@@ -1,8 +1,9 @@
-import { useRef, useMutationEffect, useLayoutEffect } from "react";
+import { useRef, useCallback, useEffect, useLayoutEffect } from "react";
 
 export const useAnimationFrame = callback => {
   const callbackRef = useRef(callback);
-  useMutationEffect(() => {
+
+  useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
 

@@ -7,6 +7,40 @@ const LoadMoreStyles = {
   TombStones: "tombstones"
 };
 
+const styles = {
+  toolbar: {
+    padding: "10px",
+    flexGrow: "1"
+  },
+  listViewPane: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%"
+  },
+  lists: {
+    flexGrow: "2",
+    display: "flex",
+    height: "100%",
+    flexDirection: "row",
+    width: "100%"
+  },
+  adaptiveList: {
+    border: "solid 1px #bbb",
+    flexGrow: "1",
+    height: "100%",
+    boxSizing: "border-box",
+    overflowY: "auto",
+    position: "relative"
+  },
+  rowStyle: {
+    boxSizing: "border-box",
+    padding: "15px",
+    height: "60px",
+    position: "absolute",
+    width: "100%"
+  }
+};
+
 // simple func to manage data loading scenarios for the list component
 // This enables you to vary data page size, loading speed, 'load more'
 // styling and total record count (for long lists)
@@ -63,20 +97,21 @@ function AdaptiveListContainer() {
     loadMoreStyle: LoadMoreStyles.TombStones
   });
   const listManagerC = listManager({
-    isCompleteOnInit: true,
+    isCompleteOnInit: false,
     initialRowCount: 3000,
     sideEffectSpeedMs: 0,
-    pageSize: 2,
+    pageSize: 200,
     totalRecords: 300000,
     loadMoreStyle: LoadMoreStyles.TombStones
   });
   //
 
   return (
-    <div className="ListViewPane block-fill-height">
-      <div className="Toolbar">Header x</div>
-      <div className="Lists">
+    <div style={styles.listViewPane} className="block-fill-height">
+      <div style={styles.toolbar}>Header x</div>
+      <div style={styles.lists}>
         <AdaptiveList
+          style={styles.adaptiveList}
           overscanAmount={20}
           initialData={listManagerA.initialData}
           isCompleteOnInit={listManagerA.isCompleteOnInit}
@@ -87,8 +122,7 @@ function AdaptiveListContainer() {
             <div
               key={index}
               id={`row${index}`}
-              className="rowStyle"
-              style={computedStyle}
+              style={{ ...styles.rowStyle, ...computedStyle }}
             >
               <div>
                 <b>{item.title}</b>
@@ -103,6 +137,7 @@ function AdaptiveListContainer() {
           renderLoadingMore={computedStyle => <div>Loading more....</div>}
         />
         <AdaptiveList
+          style={styles.adaptiveList}
           initialData={listManagerB.initialData}
           isCompleteOnInit={listManagerB.isCompleteOnInit}
           onLoadMore={listManagerB.handleLoadMore}
@@ -112,8 +147,7 @@ function AdaptiveListContainer() {
             <div
               key={index}
               id={`row${index}`}
-              className="rowStyle"
-              style={computedStyle}
+              style={{ ...styles.rowStyle, ...computedStyle }}
             >
               <div>
                 <b>{item.title}</b>
@@ -132,6 +166,7 @@ function AdaptiveListContainer() {
           renderLoadingMore={computedStyle => <div>Loading more....</div>}
         />
         <AdaptiveList
+          style={styles.adaptiveList}
           initialData={listManagerC.initialData}
           isCompleteOnInit={listManagerC.isCompleteOnInit}
           onLoadMore={listManagerC.handleLoadMore}
@@ -141,8 +176,7 @@ function AdaptiveListContainer() {
             <div
               key={index}
               id={`row${index}`}
-              className="rowStyle"
-              style={computedStyle}
+              style={{ ...styles.rowStyle, ...computedStyle }}
             >
               <div>
                 <b>{item.title}</b>
@@ -161,7 +195,7 @@ function AdaptiveListContainer() {
           renderLoadingMore={computedStyle => <div>Loading more....</div>}
         />
       </div>
-      <div className="Toolbar">Footer</div>
+      <div style={styles.toolbar}>Footer</div>
     </div>
   );
 }
