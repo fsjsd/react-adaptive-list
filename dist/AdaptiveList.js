@@ -1,13 +1,9 @@
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
-import { useDebouncedCallback } from "use-debounce"; //
-
-const style = {
-  wrapper: {//overflowY: 'auto',
-  }
-};
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { useAnimationFrame } from "../hooks/useAnimationFrame";
 const scrollDebounceMs = 16;
 
 const calcViewPortStyles = el => ({
@@ -25,6 +21,7 @@ const getElementPos = el => ({
 });
 
 const AdaptiveList = ({
+  style,
   initialData,
   isCompleteOnInit,
   onLoadMore,
@@ -38,18 +35,6 @@ const AdaptiveList = ({
   // loadingindicator | tombstones
   ...props
 }) => {
-  // default loadingMore if none is provided
-  if (!renderLoadingMore) {
-    renderLoadingMore = () => React.createElement("div", null, "Loading ...");
-  }
-
-  if (!renderTombstone) {
-    renderTombstone = computedStyle => React.createElement("div", {
-      style: { ...computedStyle
-      }
-    });
-  }
-
   const [state, setState] = useState({
     items: initialData,
     isComplete: isCompleteOnInit,
@@ -60,8 +45,7 @@ const AdaptiveList = ({
     viewportScrollHeight: 0,
     viewportScrollPosition: 0,
     reachedLimit: false
-  }); //const [visibleViewportHeight, setVisibleViewportHeight] = useState(null);
-
+  });
   const overscan = rowHeight * overscanAmount;
   const setIsLoadingMore = useCallback(isLoadingMore => {
     setState(prevState => ({ ...prevState,
@@ -74,13 +58,14 @@ const AdaptiveList = ({
   // for more data
 
   let loadMoreElRef = useRef();
-  const getViewportWrapper = useCallback(() => viewportWrapperElRef.current); //const getLoadMoreEl = () => loadMoreElRef.current;
+  const getViewportWrapper = useCallback(() => viewportWrapperElRef.current, [viewportWrapperElRef]); //const getLoadMoreEl = () => loadMoreElRef.current;
 
   const getVisibleHeight = useCallback(() => {
     let el = getViewportWrapper();
     let visHeight = el ? parseFloat(window.getComputedStyle(el, null).getPropertyValue("height")) : 10000;
     return visHeight;
-  }, [getViewportWrapper]); // Debounce callback
+  }, [getViewportWrapper]);
+  useAnimationFrame(() => {}); // Debounce callback
   // https://github.com/xnimorz/use-debounce
   // Use { maxWait: 2000 } to emulate throttle?
   // https://github.com/xnimorz/use-debounce/blob/master/src/callback.js
@@ -99,12 +84,6 @@ const AdaptiveList = ({
   scrollDebounceMs, {
     maxWait: scrollDebounceMs
   });
-  /*
-    useAnimationFrame(() =>
-    setValue(v => v + 0.01)
-  );
-  */
-
   const shouldLoadMore = useCallback(() => {
     // don't attempt loading more if already in flight
     // drop out immediately on these flags to optimise repeat calls early
@@ -186,8 +165,7 @@ const AdaptiveList = ({
     };
   }, [getViewportWrapper, getVisibleHeight, handleScroll, shouldLoadMore]);
   return React.createElement("div", _extends({}, props, {
-    style: { ...(props.style || {}),
-      ...style.wrapper
+    style: { ...(style || {})
     },
     ref: viewportWrapperElRef
   }), state.isComplete && state.items.length === 0 && renderEmptyList(), state.items.map((item, index) => isRowVisibleInViewPort(index) && renderRow({
@@ -196,7 +174,7 @@ const AdaptiveList = ({
     computedStyle: {
       transform: `translate(0px, ${index * rowHeight}px)`
     }
-  })), state.isLoadingMore && loadingMoreStyle === "tombstones" && visibleTombStonePositions().map(tombStoneInfo => renderTombstone(tombStoneInfo)), React.createElement("div", {
+  })), state.isLoadingMore && loadingMoreStyle === "tombstones" && visibleTombStonePositions().map(tombStoneInfo => renderTombstone ? renderTombstone(tombStoneInfo) : React.createElement("div", null)), React.createElement("div", {
     ref: loadMoreElRef,
     style: {
       position: "absolute",
@@ -205,10 +183,11 @@ const AdaptiveList = ({
   }, // show loading indictor if loading more or
   // if loadMore callback initiated via shouldLoadMore(),
   // and if set component style
-  (state.isLoadingMore || shouldLoadMore()) && loadingMoreStyle === "loadingindicator" ? renderLoadingMore() : React.createElement("div", null, "\xA0")));
+  (state.isLoadingMore || shouldLoadMore()) && loadingMoreStyle === "loadingindicator" ? renderLoadingMore ? renderLoadingMore() : React.createElement("div", null, "Loading ...") : React.createElement("div", null, "\xA0")));
 };
 
 AdaptiveList.propTypes = {
+  style: PropTypes.object.isRequired,
   initialData: PropTypes.array.isRequired,
   isCompleteOnInit: PropTypes.bool.isRequired,
   onLoadMore: PropTypes.func.isRequired,
@@ -216,6 +195,8 @@ AdaptiveList.propTypes = {
   renderEmptyList: PropTypes.func.isRequired,
   renderLoadingMore: PropTypes.func,
   renderTombstone: PropTypes.func,
-  overscanAmount: PropTypes.number
+  rowHeight: PropTypes.number,
+  overscanAmount: PropTypes.number,
+  loadingMoreStyle: PropTypes.string
 };
 export default React.memo(AdaptiveList);

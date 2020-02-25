@@ -1,6 +1,6 @@
 {
   "name": "react-adaptive-list",
-  "version": "1.0.15a",
+  "version": "1.0.17",
   "private": false,
   "main": "dist/AdaptiveList.js",
   "module": "dist/AdaptiveList.js",
