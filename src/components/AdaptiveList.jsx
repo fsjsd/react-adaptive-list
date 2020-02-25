@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
@@ -20,7 +20,8 @@ const getElementPos = el => ({
 });
 
 const AdaptiveList = ({
-  initialData,
+  style,
+    initialData,
   isCompleteOnInit,
   onLoadMore,
   renderRow,
@@ -32,13 +33,6 @@ const AdaptiveList = ({
   loadingMoreStyle = "loadingindicator", // loadingindicator | tombstones
   ...props
 }) => {
-  // default loadingMore if none is provided
-  if (!renderLoadingMore) {
-    renderLoadingMore = () => <div>Loading ...</div>;
-  }
-  if (!renderTombstone) {
-    renderTombstone = computedStyle => <div style={{ ...computedStyle }} />;
-  }
 
   const [state, setState] = useState({
     items: initialData,
@@ -51,8 +45,6 @@ const AdaptiveList = ({
     viewportScrollPosition: 0,
     reachedLimit: false
   });
-
-  //const [visibleViewportHeight, setVisibleViewportHeight] = useState(null);
 
   const overscan = rowHeight * overscanAmount;
 
@@ -71,7 +63,7 @@ const AdaptiveList = ({
   // for more data
   let loadMoreElRef = useRef();
 
-  const getViewportWrapper = useCallback(() => viewportWrapperElRef.current);
+  const getViewportWrapper = useCallback(() => viewportWrapperElRef.current, [viewportWrapperElRef]);
 
   //const getLoadMoreEl = () => loadMoreElRef.current;
   const getVisibleHeight = useCallback(() => {
@@ -213,7 +205,7 @@ const AdaptiveList = ({
     <div
       {...props}
       style={{
-        ...(props.style || {})
+        ...(style || {})
       }}
       ref={viewportWrapperElRef}
     >
@@ -232,7 +224,11 @@ const AdaptiveList = ({
       {state.isLoadingMore &&
         loadingMoreStyle === "tombstones" &&
         visibleTombStonePositions().map(tombStoneInfo =>
-          renderTombstone(tombStoneInfo)
+          (
+            renderTombstone
+            ? renderTombstone(tombStoneInfo)
+            : <div />
+          )
         )}
       <div
         ref={loadMoreElRef}
@@ -246,7 +242,9 @@ const AdaptiveList = ({
         // and if set component style
         (state.isLoadingMore || shouldLoadMore()) &&
         loadingMoreStyle === "loadingindicator" ? (
-          renderLoadingMore()
+          renderLoadingMore 
+            ? renderLoadingMore()
+            : <div>Loading ...</div>
         ) : (
           <div>&nbsp;</div>
         )}
@@ -256,6 +254,7 @@ const AdaptiveList = ({
 };
 
 AdaptiveList.propTypes = {
+  style: PropTypes.object.isRequired,
   initialData: PropTypes.array.isRequired,
   isCompleteOnInit: PropTypes.bool.isRequired,
   onLoadMore: PropTypes.func.isRequired,
@@ -263,7 +262,9 @@ AdaptiveList.propTypes = {
   renderEmptyList: PropTypes.func.isRequired,
   renderLoadingMore: PropTypes.func,
   renderTombstone: PropTypes.func,
-  overscanAmount: PropTypes.number
+  rowHeight: PropTypes.number,
+  overscanAmount: PropTypes.number,
+  loadingMoreStyle: PropTypes.string,
 };
 
 export default React.memo(AdaptiveList);

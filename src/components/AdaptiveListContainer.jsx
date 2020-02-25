@@ -60,11 +60,11 @@ const listManager = ({
       title: `Item #${_id}`
     }));
 
-  const initialData = new Array(initialRowCount).fill(0).map(_ => itemMock());
+  const initialData = new Array(initialRowCount).fill(0).map(() => itemMock());
 
   const handleLoadMore = onItemsReady => {
     window.setTimeout(() => {
-      const newItems = new Array(pageSize).fill(0).map(_ => itemMock());
+      const newItems = new Array(pageSize).fill(0).map(() => itemMock());
       let completed = _id > totalRecords;
       onItemsReady({ items: newItems, complete: completed });
     }, sideEffectSpeedMs);
@@ -134,7 +134,7 @@ function AdaptiveListContainer() {
             <Tombstone style={{ top }} key={index} id={`tombstone${index}`} />
           )}
           renderEmptyList={() => <div>Empty</div>}
-          renderLoadingMore={computedStyle => <div>Loading more....</div>}
+          renderLoadingMore={() => <div>Loading more....</div>}
         />
         <AdaptiveList
           style={styles.adaptiveList}
@@ -163,7 +163,7 @@ function AdaptiveListContainer() {
             />
           )}
           renderEmptyList={() => <div>Empty</div>}
-          renderLoadingMore={computedStyle => <div>Loading more....</div>}
+          renderLoadingMore={() => <div>Loading more....</div>}
         />
         <AdaptiveList
           style={styles.adaptiveList}
@@ -192,7 +192,7 @@ function AdaptiveListContainer() {
             />
           )}
           renderEmptyList={() => <div>Empty</div>}
-          renderLoadingMore={computedStyle => <div>Loading more....</div>}
+          renderLoadingMore={() => <div>Loading more....</div>}
         />
       </div>
       <div style={styles.toolbar}>Footer</div>
