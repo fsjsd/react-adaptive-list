@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { useAnimationFrame } from "../hooks/useAnimationFrame";
+import { useAnimationFrame } from "./useAnimationFrame";
 
 const scrollDebounceMs = 16;
 

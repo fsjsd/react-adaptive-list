@@ -3,7 +3,7 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { useAnimationFrame } from "../hooks/useAnimationFrame";
+import { useAnimationFrame } from "./useAnimationFrame";
 const scrollDebounceMs = 16;
 
 const calcViewPortStyles = el => ({
@@ -164,26 +164,37 @@ const AdaptiveList = ({
       wrapperRef && getViewportWrapper().removeEventListener("resize", handleScroll);
     };
   }, [getViewportWrapper, getVisibleHeight, handleScroll, shouldLoadMore]);
-  return React.createElement("div", _extends({}, props, {
-    style: { ...(style || {})
-    },
-    ref: viewportWrapperElRef
-  }), state.isComplete && state.items.length === 0 && renderEmptyList(), state.items.map((item, index) => isRowVisibleInViewPort(index) && renderRow({
-    index: index,
-    item,
-    computedStyle: {
-      transform: `translate(0px, ${index * rowHeight}px)`
-    }
-  })), state.isLoadingMore && loadingMoreStyle === "tombstones" && visibleTombStonePositions().map(tombStoneInfo => renderTombstone ? renderTombstone(tombStoneInfo) : React.createElement("div", null)), React.createElement("div", {
-    ref: loadMoreElRef,
-    style: {
-      position: "absolute",
-      transform: `translate(0px, ${state.items.length * rowHeight}px)`
-    }
-  }, // show loading indictor if loading more or
-  // if loadMore callback initiated via shouldLoadMore(),
-  // and if set component style
-  (state.isLoadingMore || shouldLoadMore()) && loadingMoreStyle === "loadingindicator" ? renderLoadingMore ? renderLoadingMore() : React.createElement("div", null, "Loading ...") : React.createElement("div", null, "\xA0")));
+  return (
+    /*#__PURE__*/
+    React.createElement("div", _extends({}, props, {
+      style: { ...(style || {})
+      },
+      ref: viewportWrapperElRef
+    }), state.isComplete && state.items.length === 0 && renderEmptyList(), state.items.map((item, index) => isRowVisibleInViewPort(index) && renderRow({
+      index: index,
+      item,
+      computedStyle: {
+        transform: `translate(0px, ${index * rowHeight}px)`
+      }
+    })), state.isLoadingMore && loadingMoreStyle === "tombstones" && visibleTombStonePositions().map(tombStoneInfo => renderTombstone ? renderTombstone(tombStoneInfo) :
+    /*#__PURE__*/
+    React.createElement("div", null)),
+    /*#__PURE__*/
+    React.createElement("div", {
+      ref: loadMoreElRef,
+      style: {
+        position: "absolute",
+        transform: `translate(0px, ${state.items.length * rowHeight}px)`
+      }
+    }, // show loading indictor if loading more or
+    // if loadMore callback initiated via shouldLoadMore(),
+    // and if set component style
+    (state.isLoadingMore || shouldLoadMore()) && loadingMoreStyle === "loadingindicator" ? renderLoadingMore ? renderLoadingMore() :
+    /*#__PURE__*/
+    React.createElement("div", null, "Loading ...") :
+    /*#__PURE__*/
+    React.createElement("div", null, "\xA0")))
+  );
 };
 
 AdaptiveList.propTypes = {
@@ -199,4 +210,370 @@ AdaptiveList.propTypes = {
   overscanAmount: PropTypes.number,
   loadingMoreStyle: PropTypes.string
 };
-export default React.memo(AdaptiveList);
+export default
+/*#__PURE__*/
+React.memo(AdaptiveList);
+import React from "react";
+import AdaptiveList from "./AdaptiveList";
+import Tombstone from "./Tombstone";
+const LoadMoreStyles = {
+  LoadingIndicator: "loadingindicator",
+  TombStones: "tombstones"
+};
+const styles = {
+  toolbar: {
+    padding: "10px",
+    flexGrow: "1"
+  },
+  listViewPane: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%"
+  },
+  lists: {
+    flexGrow: "2",
+    display: "flex",
+    height: "100%",
+    flexDirection: "row",
+    width: "100%"
+  },
+  adaptiveList: {
+    border: "solid 1px #bbb",
+    flexGrow: "1",
+    height: "100%",
+    boxSizing: "border-box",
+    overflowY: "auto",
+    position: "relative"
+  },
+  rowStyle: {
+    boxSizing: "border-box",
+    padding: "15px",
+    height: "60px",
+    position: "absolute",
+    width: "100%"
+  }
+}; // simple func to manage data loading scenarios for the list component
+// This enables you to vary data page size, loading speed, 'load more'
+// styling and total record count (for long lists)
+
+const listManager = ({
+  initialRowCount = 0,
+  isCompleteOnInit = false,
+  sideEffectSpeedMs = 2000,
+  loadMoreStyle = LoadMoreStyles.LoadingIndicator,
+  pageSize = 5,
+  totalRecords = 30
+} = {}) => {
+  let _id = 0;
+
+  let makeId = func => ++_id && func();
+
+  const itemMock = () => makeId(() => ({
+    id: _id,
+    title: `Item #${_id}`
+  }));
+
+  const initialData = new Array(initialRowCount).fill(0).map(() => itemMock());
+
+  const handleLoadMore = onItemsReady => {
+    window.setTimeout(() => {
+      const newItems = new Array(pageSize).fill(0).map(() => itemMock());
+      let completed = _id > totalRecords;
+      onItemsReady({
+        items: newItems,
+        complete: completed
+      });
+    }, sideEffectSpeedMs);
+  };
+
+  return {
+    initialData,
+    isCompleteOnInit,
+    handleLoadMore,
+    loadMoreStyle
+  };
+};
+
+function AdaptiveListContainer() {
+  // ============== Adaptive List ==============
+  //const listManagerA = listManager();
+  const listManagerA = listManager({
+    initialRowCount: 0,
+    sideEffectSpeedMs: 200,
+    pageSize: 3,
+    totalRecords: 5000,
+    loadMoreStyle: LoadMoreStyles.LoadingIndicator
+  });
+  const listManagerB = listManager({
+    initialRowCount: 2,
+    sideEffectSpeedMs: 500,
+    pageSize: 2,
+    totalRecords: 50,
+    loadMoreStyle: LoadMoreStyles.TombStones
+  });
+  const listManagerC = listManager({
+    isCompleteOnInit: false,
+    initialRowCount: 3000,
+    sideEffectSpeedMs: 0,
+    pageSize: 200,
+    totalRecords: 300000,
+    loadMoreStyle: LoadMoreStyles.TombStones
+  }); //
+
+  return (
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: styles.listViewPane,
+      className: "block-fill-height"
+    },
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: styles.toolbar
+    }, "Header x"),
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: styles.lists
+    },
+    /*#__PURE__*/
+    React.createElement(AdaptiveList, {
+      style: styles.adaptiveList,
+      overscanAmount: 20,
+      initialData: listManagerA.initialData,
+      isCompleteOnInit: listManagerA.isCompleteOnInit,
+      onLoadMore: listManagerA.handleLoadMore,
+      loadingMoreStyle: listManagerA.loadMoreStyle,
+      rowHeight: 60,
+      renderRow: ({
+        index,
+        item,
+        computedStyle
+      }) =>
+      /*#__PURE__*/
+      React.createElement("div", {
+        key: index,
+        id: `row${index}`,
+        style: { ...styles.rowStyle,
+          ...computedStyle
+        }
+      },
+      /*#__PURE__*/
+      React.createElement("div", null,
+      /*#__PURE__*/
+      React.createElement("b", null, item.title)),
+      /*#__PURE__*/
+      React.createElement("div", null, "List A: More detail")),
+      renderTombstone: ({
+        index,
+        top
+      }) =>
+      /*#__PURE__*/
+      React.createElement(Tombstone, {
+        style: {
+          top
+        },
+        key: index,
+        id: `tombstone${index}`
+      }),
+      renderEmptyList: () =>
+      /*#__PURE__*/
+      React.createElement("div", null, "Empty"),
+      renderLoadingMore: () =>
+      /*#__PURE__*/
+      React.createElement("div", null, "Loading more....")
+    }),
+    /*#__PURE__*/
+    React.createElement(AdaptiveList, {
+      style: styles.adaptiveList,
+      initialData: listManagerB.initialData,
+      isCompleteOnInit: listManagerB.isCompleteOnInit,
+      onLoadMore: listManagerB.handleLoadMore,
+      loadingMoreStyle: listManagerB.loadMoreStyle,
+      rowHeight: 60,
+      renderRow: ({
+        item,
+        computedStyle,
+        index
+      }) =>
+      /*#__PURE__*/
+      React.createElement("div", {
+        key: index,
+        id: `row${index}`,
+        style: { ...styles.rowStyle,
+          ...computedStyle
+        }
+      },
+      /*#__PURE__*/
+      React.createElement("div", null,
+      /*#__PURE__*/
+      React.createElement("b", null, item.title)),
+      /*#__PURE__*/
+      React.createElement("div", null, "List B: More detail")),
+      renderTombstone: ({
+        index,
+        top
+      }) =>
+      /*#__PURE__*/
+      React.createElement(Tombstone, {
+        style: {
+          top: top
+        },
+        key: index,
+        id: `tombstone${index}`
+      }),
+      renderEmptyList: () =>
+      /*#__PURE__*/
+      React.createElement("div", null, "Empty"),
+      renderLoadingMore: () =>
+      /*#__PURE__*/
+      React.createElement("div", null, "Loading more....")
+    }),
+    /*#__PURE__*/
+    React.createElement(AdaptiveList, {
+      style: styles.adaptiveList,
+      initialData: listManagerC.initialData,
+      isCompleteOnInit: listManagerC.isCompleteOnInit,
+      onLoadMore: listManagerC.handleLoadMore,
+      loadingMoreStyle: listManagerC.loadMoreStyle,
+      rowHeight: 60,
+      renderRow: ({
+        item,
+        computedStyle,
+        index
+      }) =>
+      /*#__PURE__*/
+      React.createElement("div", {
+        key: index,
+        id: `row${index}`,
+        style: { ...styles.rowStyle,
+          ...computedStyle
+        }
+      },
+      /*#__PURE__*/
+      React.createElement("div", null,
+      /*#__PURE__*/
+      React.createElement("b", null, item.title)),
+      /*#__PURE__*/
+      React.createElement("div", null, "List C: More detail")),
+      renderTombstone: ({
+        index,
+        top
+      }) =>
+      /*#__PURE__*/
+      React.createElement(Tombstone, {
+        style: {
+          top: top
+        },
+        key: index,
+        id: `tombstone${index}`
+      }),
+      renderEmptyList: () =>
+      /*#__PURE__*/
+      React.createElement("div", null, "Empty"),
+      renderLoadingMore: () =>
+      /*#__PURE__*/
+      React.createElement("div", null, "Loading more....")
+    })),
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: styles.toolbar
+    }, "Footer"))
+  );
+}
+
+export default AdaptiveListContainer;
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+import React from "react";
+const styles = {
+  wrapper: {
+    display: "flex",
+    flexDirection: "row",
+    position: "absolute",
+    boxSizing: "border-box",
+    padding: "15px",
+    height: "60px",
+    width: "100%"
+  },
+  avatar: {
+    backgroundColor: "#eee",
+    width: "40px",
+    height: "40px",
+    marginRight: "10px"
+  },
+  background: {
+    backgroundColor: "#eee",
+    animationName: "color",
+    animationDuration: "1s",
+    animationIterationCount: "infinite"
+  },
+  textWrapper: {
+    flexGrow: "2"
+  },
+  text: {
+    fontSize: "10px",
+    height: "15px",
+    flexGrow: "2"
+  }
+};
+
+function Tombstone({
+  style,
+  ...restProps
+}) {
+  return (
+    /*#__PURE__*/
+    React.createElement("div", _extends({
+      style: { ...styles.wrapper,
+        ...style
+      }
+    }, restProps),
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: { ...styles.background,
+        ...styles.avatar
+      }
+    }),
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: styles.textWrapper
+    },
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: {
+        width: "20%",
+        marginBottom: "10px",
+        ...styles.background,
+        ...styles.text
+      }
+    }),
+    /*#__PURE__*/
+    React.createElement("div", {
+      style: { ...styles.background,
+        ...styles.text
+      }
+    })))
+  ); //#{index} {top}
+}
+
+export default Tombstone;
+import React from "react";
+import ReactDOM from "react-dom";
+import Tombstone from "./Tombstone";
+it("stub", () => {});
+import { useRef, useCallback, useEffect, useLayoutEffect } from "react";
+export const useAnimationFrame = callback => {
+  const callbackRef = useRef(callback);
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+  const loop = useCallback(() => {
+    frameRef.current = requestAnimationFrame(loop);
+    const cb = callbackRef.current;
+    cb();
+  });
+  const frameRef = useRef();
+  useLayoutEffect(() => {
+    frameRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [loop]);
+};
