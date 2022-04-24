@@ -1,3 +1,5 @@
+🔴 _Project archived. I've learnt a lot since creating this a few years ago, and there are much better patterns for addressing this problem now (IntersectionObserver, DOM recycling). For a more up to date demo, see [https://github.com/fsjsd/frontend-patterns](https://github.com/fsjsd/frontend-patterns)_
+
 # React Adaptive List
 
 ![React Adaptive List](https://github.com/fsjsd/react-adaptive-list/blob/master/docs/readme-header-reactadaptivelist.jpg?raw=true)
